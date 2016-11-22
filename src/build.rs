@@ -2,7 +2,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::io;
 
-use git2::{BranchType, Commit, Reference, Repository, Signature};
+use git2::{self, BranchType, Commit, Reference, Repository, Signature};
 
 use super::Args;
 use super::util;
