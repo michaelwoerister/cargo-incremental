@@ -26,7 +26,7 @@ pub fn build(args: &Args) {
     let repo_dir = cargo_toml_path.parent().unwrap();
 
     // Check that there are no are untracked .rs files that might affect the build.
-    let changes = check_untracked_rs_files(repo);
+    let changes = check_working_dir_status(repo);
 
     // Only create a snapshot if something actually has changed.
     if changes {
