@@ -170,6 +170,10 @@ fn commit_checkpoint(repo: &Repository) {
         Err(e) => error!("{}", e),
     };
 
+    for entry in updated_tree.iter() {
+        println!("name: {}, kind: {:?}", entry.name().unwrap(), entry.kind());
+    }
+
     let oid = match repo.refname_to_id("refs/heads/cargo-incremental-build") {
         Ok(oid) => oid,
         Err(e) => error!("failed to get oid for cargo-incremental branch: {}", e),
