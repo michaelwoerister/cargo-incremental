@@ -111,6 +111,31 @@ fn check_untracked_rs_files(repo: &Repository) {
     }
 }
 
+fn check_changes(repo: &Repository) -> bool {
+    let statuses = match repo.statuses(None) {
+        Ok(s) => s,
+        Err(err) => error!("could not load git repository status: {}", err),
+    };
+
+    statuses.len() > 0
+
+    // for status in statuses.iter() {
+    //     if status.status().intersects(STATUS_WT_NEW) {
+    //         if let Some(p) = status.path() {
+    //             if p.ends_with("rs") {
+    //                 let stderr = io::stderr();
+    //                 let mut stderr = stderr.lock();
+    //                 writeln!(stderr, "file `{}` is untracked", p).unwrap();
+    //                 errors += 1;
+    //             }
+    //         }
+    //     }
+    // }
+    // if errors > 0 {
+    //     error!("there are untracked .rs files in the repository");
+    // }
+}
+
 fn create_branch_if_new(repo: &Repository, name: &str, head: &Reference) {
     if let Ok(_) = repo.find_branch(name, BranchType::Local) {
         return;
