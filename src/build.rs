@@ -190,7 +190,7 @@ fn commit_checkpoint(repo: &Repository) {
     //     for updated_tree
     // }
     for entry in updated_tree.iter() {
-        if last_commit_tree.get_id().is_some() {
+        if last_commit_tree.get_id(entry.id()).is_some() {
             println!("Found: {}", entry.name().unwrap());
         } else {
             println!("Could not find: {}", entry.name().unwrap());
