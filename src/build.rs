@@ -121,7 +121,7 @@ fn check_changes(repo: &Repository) -> bool {
     };
 
     for status in statuses.iter() {
-        debug!("found change: {}", git2_status_to_string(status.status()));
+        println!("found change: {}", git2_status_to_string(status.status()));
     }
 
     statuses.len() > 0
