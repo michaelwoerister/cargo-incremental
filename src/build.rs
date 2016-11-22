@@ -38,12 +38,8 @@ pub fn build(args: &Args) {
     create_branch_if_new(repo, "cargo-incremental-build", &current_head);
     reset_branch(repo, "refs/heads/cargo-incremental-build");
 
-    // Only create a checkpoint if something actually has changed.
-    if check_changes(repo) {
-        // Commit a checkpoint.
-        println!("committing checkpoint");
-        commit_checkpoint(repo);
-    }
+    // Commit a checkpoint.
+    maybe_commit_checkpoint(repo);
 
     // Reset back to the initial head.
     println!("bringing head back to initial state");
@@ -126,7 +122,7 @@ fn create_branch_if_new(repo: &Repository, name: &str, head: &Reference) {
     }
 }
 
-fn commit_checkpoint(repo: &Repository) {
+fn maybe_commit_checkpoint(repo: &Repository) {
     let author = match Signature::now("cargo-incremental", "none") {
         Ok(author) => author,
         Err(e) => error!("failed to create git signature: {}", e),
@@ -186,6 +182,7 @@ fn commit_checkpoint(repo: &Repository) {
     parents.push(&last_commit_incr);
     let parents = parents;
 
+    println!("committing checkpoint");
     let result = repo.commit(Some("HEAD"),
                              &author,
                              &author,
