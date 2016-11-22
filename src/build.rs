@@ -35,16 +35,20 @@ pub fn build(args: &Args) {
 
     // Checkout the branch "cargo-incremental-build", create it if it does not already
     // exist.
-    create_branch_if_new(repo, "cargo-incremental-build", &current_head);
-    reset_branch(repo, "refs/heads/cargo-incremental-build");
+    let changes = check_working_dir_status(repo, "cargo-incremental-build", &current_head);
 
-    // Commit a checkpoint.
-    println!("committing checkpoint");
-    commit_checkpoint(repo);
+    // Only create a snapshot if something actually has changed.
+    if changes {
+        reset_branch(repo, "refs/heads/cargo-incremental-build");
 
-    // Reset back to the initial head.
-    println!("bringing head back to initial state");
-    reset_branch(repo, current_head.name().unwrap());
+        // Commit a checkpoint.
+        println!("committing checkpoint");
+        commit_checkpoint(repo);
+
+        // Reset back to the initial head.
+        println!("bringing head back to initial state");
+        reset_branch(repo, current_head.name().unwrap());
+    }
 
     let incr_dir = Path::new("build-cache");
 
@@ -87,11 +91,17 @@ fn reset_branch(repo: &Repository, branch: &str) {
     }
 }
 
-fn check_untracked_rs_files(repo: &Repository) {
+// Returns true if something has changed, false otherwise.
+// Aborts if it encounters an untracked file.
+fn check_working_dir_status(repo: &Repository) -> bool {
     let statuses = match repo.statuses(None) {
         Ok(s) => s,
         Err(err) => error!("could not load git repository status: {}", err),
     };
+
+    if statuses.len() == 0 {
+        return false;
+    }
 
     let mut errors = 0;
     for status in statuses.iter() {
@@ -109,6 +119,8 @@ fn check_untracked_rs_files(repo: &Repository) {
     if errors > 0 {
         error!("there are untracked .rs files in the repository");
     }
+
+    true
 }
 
 fn create_branch_if_new(repo: &Repository, name: &str, head: &Reference) {
