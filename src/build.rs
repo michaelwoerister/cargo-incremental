@@ -187,7 +187,6 @@ fn commit_checkpoint(repo: &Repository) {
     let last_commit_tree = last_commit_incr.tree().unwrap();
 
     // if last_commit_tree.len() == updated_tree.len() {
-    //     for updated_tree
     // }
     for entry in updated_tree.iter() {
         if last_commit_tree.get_id(entry.id()).is_some() {
