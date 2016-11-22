@@ -122,7 +122,7 @@ fn check_changes(repo: &Repository) -> bool {
 
     for status in statuses.iter() {
         println!("found change `{}`: {}",
-                 status.path(),
+                 status.path().unwrap(),
                  git2_status_to_string(status.status()));
     }
 
