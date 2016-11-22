@@ -184,15 +184,16 @@ fn commit_checkpoint(repo: &Repository) {
         Err(e) => error!("failed to get commit: {}", e),
     };
 
+    // Check if there are actually any changes
     let last_commit_tree = last_commit_incr.tree().unwrap();
+    if updated_tree.len() == last_commit_tree.len() {
+        let has_changed = updated_tree.iter().any(|entry| {
+            last_commit_tree.get_id(entry.id()).is_none()
+        });
 
-    // if last_commit_tree.len() == updated_tree.len() {
-    // }
-    for entry in updated_tree.iter() {
-        if last_commit_tree.get_id(entry.id()).is_some() {
-            println!("Found: {}", entry.name().unwrap());
-        } else {
-            println!("Could not find: {}", entry.name().unwrap());
+        if !has_changed {
+            println!("No creating new checkpoint since there are no changes.");
+            return
         }
     }
 
