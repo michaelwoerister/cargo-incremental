@@ -38,9 +38,12 @@ pub fn build(args: &Args) {
     create_branch_if_new(repo, "cargo-incremental-build", &current_head);
     reset_branch(repo, "refs/heads/cargo-incremental-build");
 
-    // Commit a checkpoint.
-    println!("committing checkpoint");
-    commit_checkpoint(repo);
+    // Only create a checkpoint if something actually has changed.
+    if check_changes(repo) {
+        // Commit a checkpoint.
+        println!("committing checkpoint");
+        commit_checkpoint(repo);
+    }
 
     // Reset back to the initial head.
     println!("bringing head back to initial state");
