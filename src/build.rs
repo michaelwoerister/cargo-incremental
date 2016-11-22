@@ -26,19 +26,17 @@ pub fn build(args: &Args) {
     let repo_dir = cargo_toml_path.parent().unwrap();
 
     // Check that there are no are untracked .rs files that might affect the build.
-    check_untracked_rs_files(repo);
-
-    // Save the current head.
-    let current_head = repo.head().unwrap();
-    println!("head is: {:?}", current_head.shorthand().unwrap());
-
-
-    // Checkout the branch "cargo-incremental-build", create it if it does not already
-    // exist.
-    let changes = check_working_dir_status(repo, "cargo-incremental-build", &current_head);
+    let changes = check_untracked_rs_files(repo);
 
     // Only create a snapshot if something actually has changed.
     if changes {
+        // Save the current head.
+        let current_head = repo.head().unwrap();
+        println!("head is: {:?}", current_head.shorthand().unwrap());
+
+        // Checkout the branch "cargo-incremental-build", create it if it does not already
+        // exist.
+        create_branch_if_new(repo, "cargo-incremental-build", &current_head);
         reset_branch(repo, "refs/heads/cargo-incremental-build");
 
         // Commit a checkpoint.
