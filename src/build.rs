@@ -169,7 +169,7 @@ fn maybe_commit_checkpoint(repo: &Repository) {
         });
 
         if !has_changed {
-            println!("not creating new checkpoint since there are no changes.");
+            println!("not creating new checkpoint since there are no changes");
             return
         }
     }
