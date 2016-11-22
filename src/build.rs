@@ -114,21 +114,6 @@ fn check_untracked_rs_files(repo: &Repository) {
     }
 }
 
-fn check_changes(repo: &Repository) -> bool {
-    let statuses = match repo.statuses(None) {
-        Ok(s) => s,
-        Err(err) => error!("could not load git repository status: {}", err),
-    };
-
-    for status in statuses.iter() {
-        println!("found change `{}`: {}",
-                 status.path().unwrap(),
-                 git2_status_to_string(status.status()));
-    }
-
-    statuses.len() > 0
-}
-
 fn create_branch_if_new(repo: &Repository, name: &str, head: &Reference) {
     if let Ok(_) = repo.find_branch(name, BranchType::Local) {
         return;
