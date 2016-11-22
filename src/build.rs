@@ -184,6 +184,19 @@ fn commit_checkpoint(repo: &Repository) {
         Err(e) => error!("failed to get commit: {}", e),
     };
 
+    let last_commit_tree = last_commit_incr.tree().unwrap();
+
+    // if last_commit_tree.len() == updated_tree.len() {
+    //     for updated_tree
+    // }
+    for entry in updated_tree.iter() {
+        if last_commit_tree.get_id().is_some() {
+            println!("Found: {}", entry.name().unwrap());
+        } else {
+            println!("Could not find: {}", entry.name().unwrap());
+        }
+    }
+
     let mut parents: Vec<&Commit> = Vec::new();
     parents.push(&last_commit_incr);
     let parents = parents;
