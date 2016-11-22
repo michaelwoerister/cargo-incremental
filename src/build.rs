@@ -120,23 +120,11 @@ fn check_changes(repo: &Repository) -> bool {
         Err(err) => error!("could not load git repository status: {}", err),
     };
 
-    statuses.len() > 0
+    for status in statuses.iter() {
+        debug!("found change: {}", git2_status_to_string(status));
+    }
 
-    // for status in statuses.iter() {
-    //     if status.status().intersects(STATUS_WT_NEW) {
-    //         if let Some(p) = status.path() {
-    //             if p.ends_with("rs") {
-    //                 let stderr = io::stderr();
-    //                 let mut stderr = stderr.lock();
-    //                 writeln!(stderr, "file `{}` is untracked", p).unwrap();
-    //                 errors += 1;
-    //             }
-    //         }
-    //     }
-    // }
-    // if errors > 0 {
-    //     error!("there are untracked .rs files in the repository");
-    // }
+    statuses.len() > 0
 }
 
 fn create_branch_if_new(repo: &Repository, name: &str, head: &Reference) {
@@ -205,4 +193,50 @@ fn commit_checkpoint(repo: &Repository) {
         Ok(oid) => println!("Commit: {:?}", oid),
         Err(e) => error!("Failed to create commit: {}", e),
     };
+}
+
+fn git2_status_to_string(status: git2::Status) -> String {
+    let mut output = Vec::new();
+
+    if status.intersects(git2::STATUS_INDEX_NEW) {
+        output.push("STATUS_INDEX_NEW");
+    }
+
+    if status.intersects(git2::STATUS_INDEX_DELETED) {
+        output.push("STATUS_INDEX_DELETED");
+    }
+
+    if status.intersects(git2::STATUS_INDEX_RENAMED) {
+        output.push("STATUS_INDEX_RENAMED");
+    }
+
+    if status.intersects(git2::STATUS_INDEX_MODIFIED) {
+        output.push("STATUS_INDEX_MODIFIED");
+    }
+
+    if status.intersects(git2::STATUS_INDEX_TYPECHANGE) {
+        output.push("STATUS_INDEX_TYPECHANGE");
+    }
+
+    if status.intersects(git2::STATUS_WT_NEW) {
+        output.push("STATUS_WT_NEW");
+    }
+
+    if status.intersects(git2::STATUS_WT_DELETED) {
+        output.push("STATUS_WT_DELETED");
+    }
+
+    if status.intersects(git2::STATUS_WT_RENAMED) {
+        output.push("STATUS_WT_RENAMED");
+    }
+
+    if status.intersects(git2::STATUS_WT_MODIFIED) {
+        output.push("STATUS_WT_MODIFIED");
+    }
+
+    if status.intersects(git2::STATUS_WT_TYPECHANGE) {
+        output.push("STATUS_WT_TYPECHANGE");
+    }
+
+    output.join(" | ")
 }
