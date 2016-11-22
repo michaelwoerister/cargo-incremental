@@ -2,7 +2,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::io;
 
-use git2::{BranchType, Commit, Reference, Repository, Signature, STATUS_WT_NEW};
+use git2::{BranchType, Commit, Reference, Repository, Signature};
 
 use super::Args;
 use super::util;
@@ -98,7 +98,7 @@ fn check_untracked_rs_files(repo: &Repository) {
 
     let mut errors = 0;
     for status in statuses.iter() {
-        if status.status().intersects(STATUS_WT_NEW) {
+        if status.status().intersects(git2::STATUS_WT_NEW) {
             if let Some(p) = status.path() {
                 if p.ends_with("rs") {
                     let stderr = io::stderr();
