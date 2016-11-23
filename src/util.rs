@@ -334,7 +334,7 @@ pub fn cargo_build(cargo_dir: &Path,
 
         fn spawn_stream_reader<S: Read+Send+'static>(done_flag: Arc<AtomicBool>,
                                                      mut stream: S,
-                                                     forward: &Fn(&[u8]) + Sync)
+                                                     forward: (&Fn(&[u8])) + Sync)
                                                      -> JoinHandle<Vec<u8>> {
             thread::spawn(move || {
                 let mut data = Vec::new();
