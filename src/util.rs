@@ -325,13 +325,16 @@ pub fn cargo_build(cargo_dir: &Path,
         // });
 
         let stdout_reader = spawn_stream_reader(done.clone(),
-                                                process.stdout.take().unwrap());
+                                                process.stdout.take().unwrap(),
+                                                |_| {});
 
         let stderr_reader = spawn_stream_reader(done.clone(),
-                                                process.stderr.take().unwrap());
+                                                process.stderr.take().unwrap(),
+                                                |_| {});
 
         fn spawn_stream_reader<S: Read+Send+'static>(done_flag: Arc<AtomicBool>,
-                                                     mut stream: S)
+                                                     mut stream: S,
+                                                     forward: &Fn(&[u8]))
                                                      -> JoinHandle<Vec<u8>> {
             thread::spawn(move || {
                 let mut data = Vec::new();
@@ -342,6 +345,7 @@ pub fn cargo_build(cargo_dir: &Path,
                         error!("error reading from child process pipe")
                     });
 
+                    forward(&buffer[0 .. byte_count]);
                     data.extend(&buffer[0 .. byte_count]);
                 }
 
