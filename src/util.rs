@@ -10,6 +10,8 @@ use regex::Regex;
 use std::env;
 use std::str::FromStr;
 use std::fs::File;
+use std::thread;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Default)]
 pub struct CompilationStats {
@@ -262,7 +264,8 @@ pub fn cargo_build(cargo_dir: &Path,
                    target_dir: &Path,
                    incremental: IncrementalOptions,
                    stats: &mut CompilationStats,
-                   should_save_output: bool)
+                   should_save_output: bool,
+                   stream_output: bool)
                    -> BuildResult {
     let mut cmd = Command::new("cargo");
     cmd.current_dir(&cargo_dir);
@@ -290,7 +293,72 @@ pub fn cargo_build(cargo_dir: &Path,
                 .arg("incremental-info");
         }
     }
-    let output = cmd.output();
+
+    let output = if stream_output {
+        cmd.stdout(Stdio::piped());
+        cmd.stderr(Stdio::piped());
+
+        let process = match cmd.spawn() {
+            Ok(process) => process,
+            Err(err) => error!("failed to spawn `cargo build` process: {}", err)
+        };
+
+        let done = AtomicBool::new(false);
+
+        let stdout_reader = thread::spawn(|| {
+            let mut data = Vec::new();
+            let mut buffer = [0u8; 100];
+
+            while !done.load(Ordering::SeqCst) {
+                let byte_count = process.stdout.unwrap().read(&mut buffer).unwrap_or_else(|| {
+                    error!("error reading from child process pipe")
+                });
+
+                data.extend(&buffer[0 .. byte_count]);
+            }
+
+            data
+        });
+
+        let stderr_reader = thread::spawn(|| {
+            let mut data = Vec::new();
+            let mut buffer = [0u8; 100];
+
+            while !done.load(Ordering::SeqCst) {
+                let byte_count = process.stderr.unwrap().read(&mut buffer).unwrap_or_else(|| {
+                    error!("error reading from child process pipe")
+                });
+
+                data.extend(&buffer[0 .. byte_count]);
+            }
+
+            data
+        });
+
+        let exit_status = match process.wait().unwrap_or_else(|err| {
+            error!("error while waiting for `cargo build` process to finish: {}",
+                   err)
+        });
+
+        done.store(true, Ordering::SeqCst);
+
+        let stdout = stdout_reader.join().unwrap_or_else(|_| {
+            error!("error while reading child process stdout")
+        });
+
+        let stderr = stderr_reader.join().unwrap_or_else(|_| {
+            error!("error while reading child process stderr")
+        });
+
+        Ok(Output {
+            status: exit_status,
+            stdout: stdout,
+            stderr: stderr,
+        })
+    } else {
+        cmd.output()
+    };
+
     let output = match output {
         Ok(output) => {
             if should_save_output {
