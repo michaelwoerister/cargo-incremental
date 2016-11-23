@@ -11,6 +11,7 @@ use std::env;
 use std::str::FromStr;
 use std::fs::File;
 use std::thread;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Default)]
@@ -303,7 +304,7 @@ pub fn cargo_build(cargo_dir: &Path,
             Err(err) => error!("failed to spawn `cargo build` process: {}", err)
         };
 
-        let done = AtomicBool::new(false);
+        let done = Arc::new(AtomicBool::new(false));
 
         let stdout_reader = thread::spawn(|| {
             let mut data = Vec::new();
