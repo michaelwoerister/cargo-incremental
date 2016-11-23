@@ -332,7 +332,7 @@ pub fn cargo_build(cargo_dir: &Path,
                                                 process.stderr.take().unwrap(),
                                                 |_| {});
 
-        fn spawn_stream_reader<S: Read+Send+'static
+        fn spawn_stream_reader<S: Read+Send+'static,
                                F: Fn(&[u8])+Send+'static>(done_flag: Arc<AtomicBool>,
                                                           mut stream: S,
                                                           forward: F)
