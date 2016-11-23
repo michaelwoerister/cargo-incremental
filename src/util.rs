@@ -431,9 +431,12 @@ pub fn cargo_build(cargo_dir: &Path,
                 data.extend(&buffer[0 .. byte_count]);
             }
 
+            let size_before = data.len();
             stream.read_to_end(&mut data).unwrap_or_else(|_| {
                 error!("error reading from child process pipe")
             });
+
+            forward(&data[size_before..]);
 
             data
         })
