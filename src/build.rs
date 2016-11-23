@@ -60,7 +60,8 @@ pub fn build(args: &Args) {
                                    Path::new("target"),
                                    incr_options,
                                    &mut stats,
-                                   false);
+                                   false,
+                                   true);
 
     util::print_output(&build_result.raw_output);
 
