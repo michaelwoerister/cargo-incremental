@@ -299,7 +299,7 @@ pub fn cargo_build(cargo_dir: &Path,
         cmd.stdout(Stdio::piped());
         cmd.stderr(Stdio::piped());
 
-        let process = match cmd.spawn() {
+        let mut process = match cmd.spawn() {
             Ok(process) => process,
             Err(err) => error!("failed to spawn `cargo build` process: {}", err)
         };
