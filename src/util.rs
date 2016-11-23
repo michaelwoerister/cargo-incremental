@@ -322,28 +322,6 @@ pub fn cargo_build(cargo_dir: &Path,
                                                     stderr.write_all(bytes).unwrap();
                                                 });
 
-        fn spawn_stream_reader<S: Read+Send+'static,
-                               F: Fn(&[u8])+Send+'static>(done_flag: Arc<AtomicBool>,
-                                                          mut stream: S,
-                                                          forward: F)
-                                                          -> JoinHandle<Vec<u8>> {
-            thread::spawn(move || {
-                let mut data = Vec::new();
-                let mut buffer = [0u8; 100];
-
-                while !done_flag.load(Ordering::SeqCst) {
-                    let byte_count = stream.read(&mut buffer).unwrap_or_else(|_| {
-                        error!("error reading from child process pipe")
-                    });
-
-                    forward(&buffer[0 .. byte_count]);
-                    data.extend(&buffer[0 .. byte_count]);
-                }
-
-                data
-            })
-        }
-
         let exit_status = process.wait().unwrap_or_else(|err| {
             error!("error while waiting for `cargo build` process to finish: {}",
                    err)
@@ -428,10 +406,34 @@ pub fn cargo_build(cargo_dir: &Path,
         })
         .collect();
 
-    BuildResult {
+    return BuildResult {
         success: output.status.success(),
         messages: messages,
         raw_output: output,
+    };
+
+    fn spawn_stream_reader<S, F>(done_flag: Arc<AtomicBool>,
+                                 mut stream: S,
+                                 forward: F)
+                                 -> JoinHandle<Vec<u8>>
+        where S: Read+Send+'static,
+              F: Fn(&[u8])+Send+'static
+    {
+        thread::spawn(move || {
+            let mut data = Vec::new();
+            let mut buffer = [0u8; 100];
+
+            while !done_flag.load(Ordering::SeqCst) {
+                let byte_count = stream.read(&mut buffer).unwrap_or_else(|_| {
+                    error!("error reading from child process pipe")
+                });
+
+                forward(&buffer[0 .. byte_count]);
+                data.extend(&buffer[0 .. byte_count]);
+            }
+
+            data
+        })
     }
 }
 
