@@ -63,7 +63,7 @@ pub fn build(args: &Args) {
                                    false,
                                    true);
 
-    util::print_output(&build_result.raw_output);
+    // util::print_output(&build_result.raw_output);
 
     for m in build_result.messages {
         println!("{}", m.message);
