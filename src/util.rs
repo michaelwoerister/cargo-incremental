@@ -344,23 +344,6 @@ pub fn cargo_build(cargo_dir: &Path,
             })
         }
 
-        // let mut child_stderr = process.stderr.take().unwrap();
-        // let done_err = done.clone();
-        // let stderr_reader = thread::spawn(move || {
-        //     let mut data = Vec::new();
-        //     let mut buffer = [0u8; 100];
-
-        //     while !done_err.load(Ordering::SeqCst) {
-        //         let byte_count = child_stderr.read(&mut buffer).unwrap_or_else(|_| {
-        //             error!("error reading from child process pipe")
-        //         });
-
-        //         data.extend(&buffer[0 .. byte_count]);
-        //     }
-
-        //     data
-        // });
-
         let exit_status = process.wait().unwrap_or_else(|err| {
             error!("error while waiting for `cargo build` process to finish: {}",
                    err)
