@@ -1,0 +1,30 @@
+environment:
+  matrix:
+    - START_REV: 015851b87a
+      END_REV: 9aca124731
+    - START_REV: 9aca124731
+      END_REV: 65286710a1
+    - START_REV: 65286710a1
+      END_REV: 551a09ac10
+    - START_REV: 551a09ac10
+      END_REV: 75ac72d303
+
+install:
+  - ps: Start-FileDownload 'https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-msvc.exe'
+  - rust-nightly-x86_64-pc-windows-msvc.exe /VERYSILENT /NORESTART /DIR="C:\Program Files\Rust"
+  - SET PATH=%PATH%;C:\Program Files\Rust\bin
+  - rustc -V
+  - cargo -V
+  - cargo install cargo-incremental
+  - rm rust-nightly-x86_64-pc-windows-msvc.exe
+
+build: false
+
+test_script:
+  - cmd: C:\Users\appveyor\.cargo\bin\cargo-incremental replay --work-dir="%TEMP%\cargo-incr-workdir" --no-debuginfo --skip-tests --cli-log --just-current %START_REV%..%END_REV%
+
+#  2  75ac72d303
+# 20  551a09ac10
+# 41  65286710a1
+# 60  9aca124731
+# 77  015851b87a
