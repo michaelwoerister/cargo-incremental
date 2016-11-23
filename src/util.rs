@@ -307,7 +307,7 @@ pub fn cargo_build(cargo_dir: &Path,
         let done = Arc::new(AtomicBool::new(false));
         let done_out = done.clone();
 
-        let stdout_reader = thread::spawn(|| {
+        let stdout_reader = thread::spawn(move || {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
@@ -323,7 +323,7 @@ pub fn cargo_build(cargo_dir: &Path,
         });
 
         let done_err = done.clone();
-        let stderr_reader = thread::spawn(|| {
+        let stderr_reader = thread::spawn(move || {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
