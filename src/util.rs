@@ -299,23 +299,22 @@ pub fn cargo_build(cargo_dir: &Path,
         cmd.stdout(Stdio::piped());
         cmd.stderr(Stdio::piped());
 
-        let process = match cmd.spawn() {
-            Ok(process) => Arc::new(Mutex::new(process)),
+        let mut process = match cmd.spawn() {
+            Ok(process) => process,
             Err(err) => error!("failed to spawn `cargo build` process: {}", err)
         };
 
         let done = Arc::new(AtomicBool::new(false));
-
-        let process_out = process.clone();
         let done_out = done.clone();
+
+        let child_stdout = process.stdout.take().unwrap();
 
         let stdout_reader = thread::spawn(move || {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
             while !done_out.load(Ordering::SeqCst) {
-                let process = process_out.lock().unwrap();
-                let byte_count = process.stdout.unwrap().read(&mut buffer).unwrap_or_else(|_| {
+                let byte_count = child_stdout.read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
 
@@ -325,15 +324,14 @@ pub fn cargo_build(cargo_dir: &Path,
             data
         });
 
-        let process_err = process.clone();
+        let child_stderr = process.stderr.take().unwrap();
         let done_err = done.clone();
         let stderr_reader = thread::spawn(move || {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
             while !done_err.load(Ordering::SeqCst) {
-                let process = process_err.lock().unwrap();
-                let byte_count = process.stderr.unwrap().read(&mut buffer).unwrap_or_else(|_| {
+                let byte_count = child_stderr.read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
 
