@@ -11,7 +11,7 @@ use std::env;
 use std::str::FromStr;
 use std::fs::File;
 use std::thread;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Default)]
