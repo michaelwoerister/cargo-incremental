@@ -307,7 +307,7 @@ pub fn cargo_build(cargo_dir: &Path,
         let done = Arc::new(AtomicBool::new(false));
         let done_out = done.clone();
 
-        let child_stdout = process.stdout.take().unwrap();
+        let mut child_stdout = process.stdout.take().unwrap();
 
         let stdout_reader = thread::spawn(move || {
             let mut data = Vec::new();
@@ -324,7 +324,7 @@ pub fn cargo_build(cargo_dir: &Path,
             data
         });
 
-        let child_stderr = process.stderr.take().unwrap();
+        let mut child_stderr = process.stderr.take().unwrap();
         let done_err = done.clone();
         let stderr_reader = thread::spawn(move || {
             let mut data = Vec::new();
