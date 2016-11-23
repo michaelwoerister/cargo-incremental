@@ -310,7 +310,7 @@ pub fn cargo_build(cargo_dir: &Path,
             let mut buffer = [0u8; 100];
 
             while !done.load(Ordering::SeqCst) {
-                let byte_count = process.stdout.unwrap().read(&mut buffer).unwrap_or_else(|| {
+                let byte_count = process.stdout.unwrap().read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
 
@@ -325,7 +325,7 @@ pub fn cargo_build(cargo_dir: &Path,
             let mut buffer = [0u8; 100];
 
             while !done.load(Ordering::SeqCst) {
-                let byte_count = process.stderr.unwrap().read(&mut buffer).unwrap_or_else(|| {
+                let byte_count = process.stderr.unwrap().read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
 
