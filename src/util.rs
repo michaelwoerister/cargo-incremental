@@ -431,6 +431,10 @@ pub fn cargo_build(cargo_dir: &Path,
                 data.extend(&buffer[0 .. byte_count]);
             }
 
+            stream.read_to_end(&mut data).unwrap_or_else(|_| {
+                error!("error reading from child process pipe")
+            });
+
             data
         })
     }
