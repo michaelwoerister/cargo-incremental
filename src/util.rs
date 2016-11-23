@@ -5,7 +5,7 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output};
+use std::process::{Command, Output, Stdio};
 use regex::Regex;
 use std::env;
 use std::str::FromStr;
@@ -335,7 +335,7 @@ pub fn cargo_build(cargo_dir: &Path,
             data
         });
 
-        let exit_status = match process.wait().unwrap_or_else(|err| {
+        let exit_status = process.wait().unwrap_or_else(|err| {
             error!("error while waiting for `cargo build` process to finish: {}",
                    err)
         });
