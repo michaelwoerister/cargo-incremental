@@ -10,7 +10,7 @@ use regex::Regex;
 use std::env;
 use std::str::FromStr;
 use std::fs::File;
-use std::thread;
+use std::thread::{self, JoinHandle};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
