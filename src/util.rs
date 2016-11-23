@@ -327,14 +327,14 @@ pub fn cargo_build(cargo_dir: &Path,
         let stdout_reader = spawn_stream_reader(done.clone(),
                                                 process.stdout.take().unwrap(),
                                                 |bytes| {
-                                                    let stdout = io::stdout().lock();
+                                                    let mut stdout = io::stdout().lock();
                                                     stdout.write_all(bytes).unwrap();
                                                 });
 
         let stderr_reader = spawn_stream_reader(done.clone(),
                                                 process.stderr.take().unwrap(),
                                                 |bytes| {
-                                                    let stderr = io::stderr().lock();
+                                                    let mut stderr = io::stderr().lock();
                                                     stderr.write_all(bytes).unwrap();
                                                 });
 
