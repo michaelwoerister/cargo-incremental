@@ -330,9 +330,9 @@ pub fn cargo_build(cargo_dir: &Path,
         let stderr_reader = spawn_stream_reader(done.clone(),
                                                 process.stderr.take().unwrap());
 
-        fn spawn_stream_reader<S: Read+Send>(done_flag: Arc<AtomicBool>,
-                                             stream: S)
-                                             -> JoinHandle<Vec<u8>> {
+        fn spawn_stream_reader<S: Read+Send+'static>(done_flag: Arc<AtomicBool>,
+                                                     stream: S)
+                                                     -> JoinHandle<Vec<u8>> {
             thread::spawn(move || {
                 let mut data = Vec::new();
                 let mut buffer = [0u8; 100];
