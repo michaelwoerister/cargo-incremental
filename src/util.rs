@@ -305,12 +305,13 @@ pub fn cargo_build(cargo_dir: &Path,
         };
 
         let done = Arc::new(AtomicBool::new(false));
+        let done_out = done.clone();
 
         let stdout_reader = thread::spawn(|| {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
-            while !done.load(Ordering::SeqCst) {
+            while !done_out.load(Ordering::SeqCst) {
                 let byte_count = process.stdout.unwrap().read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
@@ -321,11 +322,12 @@ pub fn cargo_build(cargo_dir: &Path,
             data
         });
 
+        let done_err = done.clone();
         let stderr_reader = thread::spawn(|| {
             let mut data = Vec::new();
             let mut buffer = [0u8; 100];
 
-            while !done.load(Ordering::SeqCst) {
+            while !done_err.load(Ordering::SeqCst) {
                 let byte_count = process.stderr.unwrap().read(&mut buffer).unwrap_or_else(|_| {
                     error!("error reading from child process pipe")
                 });
