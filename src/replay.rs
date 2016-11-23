@@ -182,7 +182,7 @@ pub fn replay(args: &Args) {
                          IncrementalOptions::None,
                          &mut stats_normal,
                          !args.flag_cli_log,
-                         true),
+                         false),
              "OK")
         });
 
@@ -196,7 +196,7 @@ pub fn replay(args: &Args) {
                          incr_options,
                          &mut stats_incr,
                          !args.flag_cli_log,
-                         true),
+                         false),
              "OK")
         });
 
@@ -291,7 +291,7 @@ pub fn replay(args: &Args) {
                                                    incr_options, // NOTE: we are using the same cache dir
                                                    &mut full_reuse_stats,
                                                    !args.flag_cli_log,
-                                                   true);
+                                                   false);
                 if result_no_change.success {
                     if full_reuse_stats.modules_reused != full_reuse_stats.modules_total {
                         error!("only {} modules out of {} re-used in full re-use test",
@@ -332,7 +332,7 @@ pub fn replay(args: &Args) {
                                                       incr_from_scratch_options,
                                                       &mut stats_incr_from_scratch,
                                                       !args.flag_cli_log,
-                                                      true);
+                                                      false);
                 if !from_scratch_result.success {
                     util::print_output(&from_scratch_result.raw_output);
                     error!("error during (incr-from-scratch) build!");
