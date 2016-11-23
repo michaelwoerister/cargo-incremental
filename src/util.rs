@@ -299,10 +299,9 @@ pub fn cargo_build(cargo_dir: &Path,
         cmd.stdout(Stdio::piped());
         cmd.stderr(Stdio::piped());
 
-        let mut process = match cmd.spawn() {
-            Ok(process) => process,
-            Err(err) => error!("failed to spawn `cargo build` process: {}", err)
-        };
+        let mut process = match cmd.spawn().unwrap_or_else(|err| {
+            error!("failed to spawn `cargo build` process: {}", err)
+        });
 
         let done = Arc::new(AtomicBool::new(false));
 
