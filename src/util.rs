@@ -305,41 +305,66 @@ pub fn cargo_build(cargo_dir: &Path,
         };
 
         let done = Arc::new(AtomicBool::new(false));
-        let done_out = done.clone();
+        // let done_out = done.clone();
 
-        let mut child_stdout = process.stdout.take().unwrap();
+        // let mut child_stdout = process.stdout.take().unwrap();
 
-        let stdout_reader = thread::spawn(move || {
-            let mut data = Vec::new();
-            let mut buffer = [0u8; 100];
+        // let stdout_reader = thread::spawn(move || {
+        //     let mut data = Vec::new();
+        //     let mut buffer = [0u8; 100];
 
-            while !done_out.load(Ordering::SeqCst) {
-                let byte_count = child_stdout.read(&mut buffer).unwrap_or_else(|_| {
-                    error!("error reading from child process pipe")
-                });
+        //     while !done_out.load(Ordering::SeqCst) {
+        //         let byte_count = child_stdout.read(&mut buffer).unwrap_or_else(|_| {
+        //             error!("error reading from child process pipe")
+        //         });
 
-                data.extend(&buffer[0 .. byte_count]);
-            }
+        //         data.extend(&buffer[0 .. byte_count]);
+        //     }
 
-            data
-        });
+        //     data
+        // });
 
-        let mut child_stderr = process.stderr.take().unwrap();
-        let done_err = done.clone();
-        let stderr_reader = thread::spawn(move || {
-            let mut data = Vec::new();
-            let mut buffer = [0u8; 100];
+        let stdout_reader = spawn_stream_reader(done.clone(),
+                                                process.stdout.take().unwrap());
 
-            while !done_err.load(Ordering::SeqCst) {
-                let byte_count = child_stderr.read(&mut buffer).unwrap_or_else(|_| {
-                    error!("error reading from child process pipe")
-                });
+        let stderr_reader = spawn_stream_reader(done.clone(),
+                                                process.stderr.take().unwrap());
 
-                data.extend(&buffer[0 .. byte_count]);
-            }
+        fn spawn_stream_reader<S: Read>(done_flag: Arc<AtomicBool>,
+                                        stream: S)
+                                        -> JoinHandle<Vec<u8>> {
+            thread::spawn(move || {
+                let mut data = Vec::new();
+                let mut buffer = [0u8; 100];
 
-            data
-        });
+                while !done_flag.load(Ordering::SeqCst) {
+                    let byte_count = stream.read(&mut buffer).unwrap_or_else(|_| {
+                        error!("error reading from child process pipe")
+                    });
+
+                    data.extend(&buffer[0 .. byte_count]);
+                }
+
+                data
+            })
+        }
+
+        // let mut child_stderr = process.stderr.take().unwrap();
+        // let done_err = done.clone();
+        // let stderr_reader = thread::spawn(move || {
+        //     let mut data = Vec::new();
+        //     let mut buffer = [0u8; 100];
+
+        //     while !done_err.load(Ordering::SeqCst) {
+        //         let byte_count = child_stderr.read(&mut buffer).unwrap_or_else(|_| {
+        //             error!("error reading from child process pipe")
+        //         });
+
+        //         data.extend(&buffer[0 .. byte_count]);
+        //     }
+
+        //     data
+        // });
 
         let exit_status = process.wait().unwrap_or_else(|err| {
             error!("error while waiting for `cargo build` process to finish: {}",
