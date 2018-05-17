@@ -17,7 +17,6 @@ use toml;
 
 #[derive(Default)]
 pub struct CompilationStats {
-    pub build_time: f64, // in seconds
     pub modules_reused: u64,
     pub modules_total: u64,
 }
@@ -385,27 +384,6 @@ pub fn cargo_build(cargo_dir: &Path,
         stats.modules_reused += reused;
         stats.modules_total += total;
     }
-
-    let build_time_regex = Regex::new(r"(?m)^\s*Finished .* target\(s\) in ([0-9.]+)(( secs)|s)$")
-        .unwrap();
-    let mut build_time = None;
-    for captures in build_time_regex.captures_iter(&all_output) {
-        if build_time.is_some() {
-            error!("cargo reported total build time twice");
-        }
-
-        build_time = Some(f64::from_str(captures.at(1).unwrap()).unwrap());
-    }
-    stats.build_time += match build_time {
-        Some(v) => v,
-        None => {
-            // if cargo errors out, it sometimes does not report a build time
-            if output.status.success() {
-                error!("cargo build did not fail but failed to report total build time");
-            }
-            0.0
-        }
-    };
 
     let message_regex = Regex::new("(?m)(warning|error): (.*)\n  --> ([^:]:\\d+:\\d+)$").unwrap();
     let messages = message_regex.captures_iter(&all_output)

@@ -388,13 +388,9 @@ pub fn replay(args: &Args) {
     println!("");
     println!("Fuzzing report:");
     println!("- {} commits built", commits.len());
-    println!("- normal compilation took {:.2}s", stats_normal.build_time);
-    println!("- incremental compilation took {:.2}s", stats_incr.build_time);
     println!("- {} total tests executed ({} of those passed)",
              tests_total,
              tests_passed);
-    println!("- normal/incremental ratio {:.2}",
-             stats_normal.build_time / stats_incr.build_time);
     println!("- {} of {} (or {:.0}%) modules were re-used",
              stats_incr.modules_reused,
              stats_incr.modules_total,
